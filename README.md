@@ -1,4 +1,4 @@
-# Docker Image with StatsD, InfluxDB and Grafana
+# Docker Image with Telegraf, StatsD, InfluxDB and Grafana
 
 ## Versions
 
@@ -6,32 +6,7 @@ StatsD:   0.7.2
 InfluxDB: 0.9.6.1  
 Grafana:  2.6.0  
 
-## Quick Start
-
-To start the container the first time launch:
-
-```sh
-docker run -d \
-  --name docker-statsd-influxdb-grafana \
-  -p 3003:9000 \
-  -p 3004:8083 \
-  -p 8086:8086 \
-  -p 22022:22 \
-  -p 8125:8125/udp \
-  samuelebistoletti/docker-statsd-influxdb-grafana
-```
-
-To stop the container launch:
-
-```sh
-docker stop docker-statsd-influxdb-grafana
-```
-
-To start the container again launch:
-
-```sh
-docker start docker-statsd-influxdb-grafana
-```
+This build is based on samuel bistoletti's build but is adapted for use in a bigboards.io deployment
 
 ## Mapped Ports
 
@@ -44,16 +19,10 @@ Host		Container		Service
 8125		8125			statsd
 22022		22				sshd
 ```
-## SSH
-
-```sh
-ssh root@localhost -p 22022
-```
-Password: root
 
 ## Grafana
 
-Open <http://localhost:3003>
+Open <http://ip:3003>
 
 ```
 Username: root
@@ -68,7 +37,7 @@ Password: root
 4. Fill remaining fields as follows and click on `Add` without altering other fields
 
 ```
-Url: http://localhost:8086
+Url: http://ip:8086
 Database:	datasource
 User: datasource
 Password:	datasource
@@ -80,15 +49,10 @@ Now you are ready to add your first dashboard and launch some query on database.
 
 ### Web Interface
 
-Open <http://localhost:3004>
+Open <http://ip:3004>
 
 ```
 Username: root  
 Password: root  
 Port: 8086
 ```
-
-### InfluxDB Shell (CLI)
-
-1. Establish a ssh connection with the container
-2. Launch `influx` to open InfluxDB Shell (CLI)
