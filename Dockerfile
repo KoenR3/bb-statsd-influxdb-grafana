@@ -92,9 +92,6 @@ VOLUME /var/log && \
 		/opt/statsd && \
 		/root
 
-EXPOSE 3003:9000
-EXPOSE 3004:8083
-EXPOSE 8086:8086
-EXPOSE 8125:8125
+EXPOSE 9000 8083 8086 8125
 
 CMD ["./my_init.sh"]
