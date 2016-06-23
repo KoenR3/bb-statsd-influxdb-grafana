@@ -9,11 +9,16 @@ ENV INFLUXDB_VERSION 0.9.6.1
 ENV GRAFANA_VERSION 2.6.0
 
 # Database Defaults
-ENV INFLUXDB_GRAFANA_DB datasource
+ENV INFLUXDB_GRAFANA_DB telegraf
 ENV INFLUXDB_GRAFANA_USER datasource
 ENV INFLUXDB_GRAFANA_PW datasource
 ENV MYSQL_GRAFANA_USER grafana
 ENV MYSQL_GRAFANA_PW grafana
+
+# Grafana defaults
+ENV GRAFANA_DATASOURCE_NAME Telegraf
+ENV GRAFANA_USER root
+ENV GRAFANA_PW root
 
 # Environment variables
 ENV DEBIAN_FRONTEND noninteractive
@@ -56,13 +61,13 @@ ADD mysql/run.sh /etc/my_init.d/01_run_mysql.sh
 ADD mysql/setup_mysql.sh /tmp/setup_mysql.sh
 
 # Configure InfluxDB
-ADD influxdb/influxdb.conf /etc/influxdb/influxdb.conf
-ADD influxdb/run.sh /etc/my_init.d/02_run_influxdb.sh
-ADD influxdb/init.sh /etc/init.d/influxdb
-ADD influxdb/setup_influxdb.sh /tmp/setup_influxdb.sh
+ADD influxdb/influxdb.conf /etc/influxdb/influxdb.conf 
+ADD	influxdb/run.sh /etc/my_init.d/02_run_influxdb.sh 
+ADD	influxdb/init.sh /etc/init.d/influxdb 
+ADD	influxdb/setup_influxdb.sh /tmp/setup_influxdb.sh
 
 # Configure StatsD
-# ADD statsd/config.js /opt/statsd/config.js
+ADD statsd/config.js /opt/statsd/config.js
 # ADD statsd/run.sh /etc/my_init.d/03_run_statsd.sh
 
 # Configure Grafana
@@ -79,18 +84,30 @@ RUN /tmp/setup_mysql.sh && \
  	/tmp/setup_influxdb.sh && \
 	rm /tmp/setup_influxdb.sh
 	
-# Copy .bashrc
+# Copy .bashrc & system related files
 ADD system/bashrc /root/.bashrc
-
 ADD system/my_init.sh /my_init.sh
 
+
+# Add dashboards & data sources to grafana
+ADD grafana/setup_grafana.sh /tmp/setup_grafana.sh
+ADD grafana/matchingdemo.json /tmp/matchingdemo.json
+
+RUN ./tmp/setup_grafana.sh && \
+	rm /tmp/setup_grafana.sh
+
 # Create volumes
-VOLUME /var/log && \
-		/var/lib/mysql && \
-		/var/opt/influxdb && \
-		/opt/influxdb && \
-		/opt/statsd && \
-		/root
+VOLUME 	/var/log
+VOLUME	/var/lib/mysql 
+VOLUME	/var/opt/influxdb 
+VOLUME	/opt/influxdb 
+VOLUME	/opt/statsd 
+VOLUME	/root
+		
+# Remove the package list to reduce image size. Note: do this as the last thing of the build process as installs can fail due to this!
+# Additional cleanup
+RUN apt-get clean && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 EXPOSE 9000 8083 8086 8125
 
